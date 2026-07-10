@@ -1,6 +1,9 @@
 # tests/test_fetch.py
+import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from rag.ingest.fetch import fetch_html
 
@@ -55,13 +58,11 @@ def test_build_corpus_writes_manifest(tmp_path: Path) -> None:
 
     assert len(manifest) == 1
     assert manifest[0]["html_path"].endswith("2401.00001.html")
-    import json
 
     on_disk = json.loads((tmp_path / "manifest.json").read_text())
     assert on_disk == manifest
 
 
-import pytest
 
 
 @pytest.mark.network
