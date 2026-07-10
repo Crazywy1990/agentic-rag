@@ -63,11 +63,10 @@ def test_build_corpus_writes_manifest(tmp_path: Path) -> None:
     assert on_disk == manifest
 
 
-
-
 @pytest.mark.network
 def test_search_and_fetch_real(tmp_path: Path) -> None:
     from rag.ingest.fetch import search_arxiv
+
     results = search_arxiv("cat:cs.CL", max_results=2)
     assert len(results) > 0 and "arxiv_id" in results[0]
 
