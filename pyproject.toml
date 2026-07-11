@@ -11,6 +11,9 @@ dependencies = [
     "feedparser>=6.0",
     "structlog>=24.4",
     "prometheus-fastapi-instrumentator>=7.0",
+    "chonkie>=1.7.0",
+    "tiktoken>=0.13.0",
+    "selectolax>=0.4.10",
 ]
 
 [dependency-groups]
