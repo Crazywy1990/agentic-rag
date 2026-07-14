@@ -15,8 +15,7 @@ def test_parse_extracts_title_and_abstract() -> None:
 def test_parse_extracts_sections_in_order() -> None:
     paper = parse_paper(FIXTURE, arxiv_id="0000.00001")
     titles = [s.title for s in paper.sections]
-    assert titles == ["1 Introduction", "2 Method"]  # empty S3 dropped
-    assert paper.sections[0].index < paper.sections[1].index
+    assert titles == ["1 Introduction", "2 Method"]  # empty S3, References, Acks all dropped
 
 
 def test_parse_joins_paragraphs() -> None:
@@ -38,3 +37,10 @@ def test_parse_survives_real_paper() -> None:
     paper = parse_paper(html, arxiv_id=html.stem)
     assert paper.title
     assert len(paper.sections) >= 1
+
+
+def test_skipped_sections_never_reach_chunks() -> None:
+    paper = parse_paper(FIXTURE, arxiv_id="0000.00001")
+    all_text = " ".join(s.text for s in paper.sections)
+    assert "Some Citation" not in all_text
+    assert "thank the test suite" not in all_text

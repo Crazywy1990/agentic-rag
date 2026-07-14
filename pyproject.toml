@@ -14,6 +14,8 @@ dependencies = [
     "chonkie>=1.7.0",
     "tiktoken>=0.13.0",
     "selectolax>=0.4.10",
+    "lancedb>=0.34.0",
+    "openai>=2.45.0",
 ]
 
 [dependency-groups]

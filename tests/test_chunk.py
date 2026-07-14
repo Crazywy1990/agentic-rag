@@ -28,15 +28,17 @@ def test_chunk_ids_unique_and_deterministic() -> None:
     ids = [c.chunk_id for c in chunks_a]
     assert len(ids) == len(set(ids))
     assert ids == [c.chunk_id for c in chunks_b]  # same input → same ids, always
-    assert ids[0] == "0000.00001:0:0"
+    assert ids[0] == "0000.00001:-1:0"  # abstract pseudo-section leads
+    assert ids[1] == "0000.00001:0:0"  # first real section follows
 
 
 def test_chunks_carry_citation_metadata_and_prefix() -> None:
     chunks = chunk_paper(make_paper(["Some section content."]))
-    c = chunks[0]
-    assert c.paper_title == "Test Paper"
-    assert c.section_title == "Section 0"
-    assert c.text.startswith("[Test Paper — Section 0]")
+    abstract, body = chunks[0], chunks[1]
+    assert abstract.section_title == "Abstract"
+    assert body.paper_title == "Test Paper"
+    assert body.section_title == "Section 0"
+    assert body.text.startswith("[Test Paper — Section 0]")
 
 
 def test_chunking_never_crosses_sections() -> None:
