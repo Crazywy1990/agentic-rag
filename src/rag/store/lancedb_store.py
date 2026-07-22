@@ -14,11 +14,10 @@ class LanceDBStore:
         self._dim = dimension
 
     def add(self, chunks: list[Chunk], vectors: list[list[float]]) -> None:
-        assert len(chunks) == len(vectors)
         rows = [{"vector": v, **c.model_dump()} for c, v in zip(chunks, vectors, strict=True)]
-        if TABLE in self._db.table_names():
+        try:
             self._db.open_table(TABLE).add(rows)
-        else:
+        except (FileNotFoundError, ValueError):
             self._db.create_table(TABLE, data=rows)
 
     def search(self, query_vector: list[float], k: int = 5) -> list[SearchResult]:
