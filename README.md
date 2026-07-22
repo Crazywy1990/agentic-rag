@@ -9,9 +9,10 @@ stated revisit condition tied to it.
 LLM calls — generation and the agentic loop — reusing its semantic caching and
 observability. Embeddings are called directly from this service (see decisions).
 
-**Status:** Week 1 — retrieval working end-to-end. 50 papers → 1,559 chunks,
-embedded and searchable in LanceDB with citation metadata on every chunk.
-Next: citation-grounded generation via the gateway.
+**Status:** Week 1 complete — end-to-end RAG with citations. Ask a question via
+`POST /ask`, get an answer grounded in retrieved chunks with inline `[chunk_id]`
+citations, and a clean refusal when the corpus can't answer. 50 papers → 1,559
+chunks in LanceDB. Next: Week 2 — the evaluation harness.
 
 ## Quickstart
 
@@ -23,6 +24,7 @@ uv run python scripts/fetch_corpus.py      # ~3 min: 50 arXiv papers -> data/raw
 uv run python scripts/build_chunks.py      # parse + chunk -> data/chunks.jsonl
 uv run python scripts/ingest.py            # embed + store -> data/lancedb (~$0.01)
 uv run python scripts/search.py "what is agentic retrieval?"
+uv run uvicorn rag.main:app          # then: curl -X POST localhost:8000/ask -d '{"question":"..."}'
 ./scripts/check.sh                         # all CI gates, locally
 ```
 
@@ -43,3 +45,7 @@ Rebuilding after chunking changes: the store is a derived artifact — always
 | 2026-07-12 | Distance metric | cosine, explicit | LanceDB default (L2) gave uninterpretable scores — found by inspection, pinned by regression test | — |
 | 2026-07-12 | Abstract handling | pseudo-section, chunk_id `{id}:-1:0` | Densest retrieval target in any paper | W2: measure abstract hit-rate |
 | 2026-07-12 | Re-ingest policy | rebuild-always; store is a derived artifact | Append-by-default silently mixes stale and fresh vectors | Corpus grows enough to need incremental ingest |
+| 2026-07-14 | Generation | via gateway, `claude-haiku-4-5`, temperature 0.0 | Reuses gateway caching/observability; temp 0 for eval reproducibility + cache hits | W2: A/B stronger generator (one line in gateway router) |
+| 2026-07-14 | Citations | inline `[chunk_id]`, chunks passed to LLM as `<chunk id=…>` | Structural id-attachment makes the model cite reliably; ids trace to sources | — |
+| 2026-07-14 | Retrieval depth | k=5 chunks per query | Reasonable default; fits context, enough for synthesis | W2: tune k against retrieval metrics |
+| 2026-07-14 | Gateway auth | Authorization header sent only when key is set | Empty `Bearer ` is a malformed header (httpx rejects); gateway currently unauthenticated | Gateway adds auth → set `RAG_GATEWAY_API_KEY` |
